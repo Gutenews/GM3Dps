@@ -5,7 +5,14 @@ Created on Sat Oct 10 10:33:47 2026
 @author: yannis
 """
 
+from __future__ import annotations
 import numpy as np
+
+class GM3DpsError(ValueError) :
+    """
+    Error raise by GM3Dps when computation is no longer viable
+    """
+    
 
 class Figure3D :
     def __init__(self, width : float, height : float) :
@@ -21,6 +28,7 @@ class Figure3D :
             for child in self.children :
                 child._export(dest)
             dest.write("showpage")
+            
 
 class Plane2D :
     def __init__(self, master : Figure3D, origin : np.ndarray, normal : np.ndarray, alpha : float) :
@@ -45,8 +53,6 @@ class Plane2D :
         ex = np.array([self._ex[0], self._ex[2]])
         ey = np.array([self._ey[0], self._ey[2]])
         M= np.array([ex, ey]).T
-        print(M)
-        print(np.dot(M, np.array([1,0])))
         D0, R0 = np.linalg.eig(M.T@M)
         D1, R1 = np.linalg.eig(M@M.T)
         
@@ -61,10 +67,6 @@ class Plane2D :
         lambda1 = np.dot(R1.T@M, R0[:,1])[1]
         alpha0 = -np.atan2(-R0[0,1], R0[0,0])
         alpha1 = np.atan2(-R1[0,1], R1[0,0])
-        r0 = np.array([[np.cos(alpha0), -np.sin(alpha0)], [np.sin(alpha0), np.cos(alpha0)]])
-        r1 = np.array([[np.cos(alpha1), -np.sin(alpha1)], [np.sin(alpha1), np.cos(alpha1)]])
-        d =  np.array([[lambda0, 0.], [0., lambda1]])
-        print(r1@d@r0)
         
         file.write("{} rotate\n".format(np.rad2deg(alpha1)))
         file.write("{} {} scale\n".format(lambda0, lambda1))
@@ -74,6 +76,19 @@ class Plane2D :
         for child in self.children :
             child._export(file)
         file.write("grestore\n")
+
+    def point(self, **kwargs) :
+        return Point2D(self, **kwargs)
+    
+    def line(self, **kwargs) :
+        return Line2D(self, **kwargs)
+    
+    def polygone(self, **kwargs) :
+        return Polygon2D(self, **kwargs)
+    
+    def rectangle(self, **kwargs) :
+        return Rectangle2D(self, **kwargs)
+    
 
 class _Object2D :
     def __init__(self, master : Plane2D) :
@@ -99,30 +114,86 @@ class _Object2D :
     def draw(self) :
         self._drawflag = True
     
+    def undraw(self) :
+        self._drawflag = False
+    
     def _export(self, file) :
         return
+    
 
 class Point2D(_Object2D) :
+    @staticmethod
+    def _compatibilitycheck(master, pointlike) :
+        if isinstance(pointlike, Point2D) :
+            return pointlike
+        elif isinstance(pointlike, np.ndarray) :
+            return Point2D(master, pointlike)
+        elif isinstance(pointlike, np.ndarray) :
+            return Point2D(master, np.array(pointlike))
+        else :
+            raise TypeError("expected Point2D, numpy ndarray or list got {} instead".format(type(pointlike)))
+    
     def __init__(self, master : Plane2D, pos : np.ndarray) :
         self.position = pos
         super().__init__(master)
+    
+    def line(self, end : np.ndarray|Point2D) :
+        return Line2D(self.master, self, end)
+    
+    def __sub__(self, other : Point2D|np.ndarray) :
+        if isinstance(other, Point2D) :
+            return self.position - other.position
+        else :
+            return self.position - other
 
 class Line2D(_Object2D):
     def __init__(self, master : Plane2D, origin : np.ndarray|Point2D, end : np.ndarray|Point2D) :
         super().__init__(master)
-        if isinstance(origin, Point2D) :
-            self.start = origin
-        else :
-            self.start = Point2D(master, origin)
-        if isinstance(end, Point2D) :
-            self.end = end
-        else :
-            self.end = Point2D(master, end)
+        self.start = Point2D._compatibilitycheck(master, origin)
+        self.end = Point2D._compatibilitycheck(master, end)
     
     def _export(self, file) :
         if self._drawflag :
             self._drawstyle(file)
             file.write("newpath {} {} moveto {} {} lineto stroke\n".format(self.start.position[0], self.start.position[1], self.end.position[0], self.end.position[1]))
+            
+
+class Polygon2D(_Object2D) :
+    def __init__(self, master : Plane2D, verteces : list[np.ndarray]|list[Point2D]) :
+        n = len(verteces)
+        self.verteces = n*[None]
+        self.edges = n*[None]
+        for i in range(n) :
+            self.verteces[i] = Point2D._compatibilitycheck(master, verteces[i])
+        super().__init__(master)
+        for i in range(n) :
+            self.edges[i] = self.verteces[i].line(self.verteces[i-n+1])
+        
+    def draw(self) :
+        super().draw()
+        for edge in self.edges:
+            edge.draw()
+    
+    def undraw(self) :
+        super().undraw()
+        for edge in self.edges:
+            edge.undraw()
+    
+    def style(self, **kwargs) :
+        super().style(**kwargs)
+        for edge in self.edges:
+            edge.style(**kwargs)
+            
+
+class Rectangle2D(Polygon2D) :
+    def __init__(self, master : Plane2D, point0 : np.ndarray|Point2D, point1 : np.ndarray|Point2D, point3 : np.ndarray|Point2D) :
+        point3 = Point2D._compatibilitycheck(master, point3)
+        point0 = Point2D._compatibilitycheck(master, point0)
+        point1 = Point2D._compatibilitycheck(master, point1)
+        if np.abs(np.dot(point1 - point0, point3 - point0)) > 1.e-6 :
+            raise GM3DpsError("The two sides of the rectangle are not perpendicular to each other")
+        super().__init__(master, [point0, point1, master.point(point1.position + (point3 - point0)), point3])
+        
 
 class _ObjectPseudo3D :
     def __init__(self, master : Figure3D, origin : np.ndarray, normal : np.ndarray) :
