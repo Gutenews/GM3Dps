@@ -23,8 +23,8 @@ class Figure3D :
     def export(self, path) :
         with open(path, 'w') as dest :
             dest.write("%!PS-Adobe-3.0 EPSF-3.0\n%%Creator : GM3Dps\n")
-            dest.write("%%BoundingBox : {} {} {} {}\n".format(300-self.width/2, 421-self.height/2, self.width, self.height))
-            dest.write("300 421 translate\ngsave\n")
+            dest.write("%%BoundingBox : {} {} {} {}\n".format(300-self.width/2, 421-self.height/2, self.width, self.height)) #centering the figure on the paper
+            dest.write("300 421 translate\ngsave\n") #centering the figure on the paper
             for child in self.children :
                 child._export(dest)
             dest.write("showpage")
@@ -45,34 +45,41 @@ class Plane2D :
         self._ey = np.array([-normal[0]*normal[2], -normal[1]*normal[2], normal[0]**2 + normal[1]**2]).astype(np.float64) #normal x ex
         self._ey /= np.linalg.norm(self._ey)
         
-    
-    def _export(self, file) :        
+        self.lambda0 = None
+        self.lambda1 = None
+        self.alpha0 = None
+        self.alpha1 = None
+        
+    def _coordinate(self, file) :
         file.write("{} {} translate\n".format(self.origin[0], self.origin[2]))
         
         #matrix computing
-        ex = np.array([self._ex[0], self._ex[2]])
-        ey = np.array([self._ey[0], self._ey[2]])
-        M= np.array([ex, ey]).T
-        D0, R0 = np.linalg.eig(M.T@M)
-        D1, R1 = np.linalg.eig(M@M.T)
+        if self.lambda0 == None :
+            ex = np.array([self._ex[0], self._ex[2]])
+            ey = np.array([self._ey[0], self._ey[2]])
+            M= np.array([ex, ey]).T
+            D0, R0 = np.linalg.eig(M.T@M)
+            D1, R1 = np.linalg.eig(M@M.T)
         
-        if not (np.isclose(D0, D1).all()) :
-            R1 = np.array([R1[:,1], R1[:,0]])
-        if np.linalg.det(R0) < 0 :
-            R0[:,1] = -R0[:,1]
-        if np.linalg.det(R1) < 0 :
-            R1[:,1] = -R1[:,1]
+            if not (np.isclose(D0, D1).all()) :
+                R1 = np.array([R1[:,1], R1[:,0]])
+            if np.linalg.det(R0) < 0 :
+                R0[:,1] = -R0[:,1]
+            if np.linalg.det(R1) < 0 :
+                R1[:,1] = -R1[:,1]
         
-        lambda0 = np.dot(R1.T@M, R0[:,0])[0]
-        lambda1 = np.dot(R1.T@M, R0[:,1])[1]
-        alpha0 = -np.atan2(-R0[0,1], R0[0,0])
-        alpha1 = np.atan2(-R1[0,1], R1[0,0])
+            self.lambda0 = np.dot(R1.T@M, R0[:,0])[0]
+            self.lambda1 = np.dot(R1.T@M, R0[:,1])[1]
+            self.alpha0 = -np.atan2(-R0[0,1], R0[0,0])
+            self.alpha1 = np.atan2(-R1[0,1], R1[0,0])
         
-        file.write("{} rotate\n".format(np.rad2deg(alpha1)))
-        file.write("{} {} scale\n".format(lambda0, lambda1))
-        file.write("{} rotate\n".format(np.rad2deg(alpha0)))
-        
+        file.write("{} rotate\n".format(np.rad2deg(self.alpha1)))
+        file.write("{} {} scale\n".format(self.lambda0, self.lambda1))
+        file.write("{} rotate\n".format(np.rad2deg(self.alpha0)))
         file.write("{} rotate\n".format(np.rad2deg(self.alpha)))
+    
+    def _export(self, file) :
+        self._coordinate(file)    
         for child in self.children :
             child._export(file)
         file.write("grestore\n")
@@ -88,6 +95,9 @@ class Plane2D :
     
     def rectangle(self, *args, **kwargs) :
         return Rectangle2D(self, *args, **kwargs)
+    
+    def ellipse(self, *args, **kwargs) :
+        return Ellipse2D(self, *args, **kwargs)
     
 
 class _Object2D :
@@ -194,6 +204,28 @@ class Rectangle2D(Polygon2D) :
             raise GM3DpsError("The two sides of the rectangle are not perpendicular to each other")
         super().__init__(master, [point0, point1, master.point(point1.position + (point3 - point0)), point3])
         
+
+class Ellipse2D(_Object2D) :
+    def __init__(self, master, center : Point2D|np.ndarray, point0 : Point2D|np.ndarray, point1 : Point2D|np.ndarray) :
+        self.center = Point2D._compatibilitycheck(master, center)
+        self.point0 = Point2D._compatibilitycheck(master, point0)
+        self.point1 = Point2D._compatibilitycheck(master, point1)
+        if np.abs(np.dot(self.point0-self.center,self.point1-self.center)) > 1.e-6 :
+            raise GM3DpsError("The minor axis and the major axis are not perpendicular to each other")
+        super().__init__(master)
+    
+    def _export(self, file) :
+        if self._drawflag :
+            Maxis = self.point0 - self.center
+            maxis = self.point1 - self.center
+            alpha = np.rad2deg(np.atan2(Maxis[1], Maxis[0]))
+            file.write("{} {} translate ".format(self.center.position[0], self.center.position[1]))
+            file.write("{} rotate ".format(alpha))
+            file.write("1 {} scale\n".format(np.linalg.norm(maxis)/np.linalg.norm(Maxis)))
+            self._drawstyle(file)
+            file.write("newpath 0 0 {} 0 360 arc stroke\ngrestore\n".format(np.linalg.norm(Maxis)))
+            self.master._coordinate(file)
+
 
 class _ObjectPseudo3D :
     def __init__(self, master : Figure3D, origin : np.ndarray, normal : np.ndarray) :
