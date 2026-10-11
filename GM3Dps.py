@@ -77,17 +77,17 @@ class Plane2D :
             child._export(file)
         file.write("grestore\n")
 
-    def point(self, **kwargs) :
-        return Point2D(self, **kwargs)
+    def point(self, *args, **kwargs) :
+        return Point2D(self, *args, **kwargs)
     
-    def line(self, **kwargs) :
-        return Line2D(self, **kwargs)
+    def line(self, *args, **kwargs) :
+        return Line2D(self, *args, **kwargs)
     
-    def polygone(self, **kwargs) :
-        return Polygon2D(self, **kwargs)
+    def polygone(self, *args, **kwargs) :
+        return Polygon2D(self, *args, **kwargs)
     
-    def rectangle(self, **kwargs) :
-        return Rectangle2D(self, **kwargs)
+    def rectangle(self, *args, **kwargs) :
+        return Rectangle2D(self, *args, **kwargs)
     
 
 class _Object2D :
