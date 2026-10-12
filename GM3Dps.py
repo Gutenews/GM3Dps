@@ -99,6 +99,9 @@ class Plane2D :
     def ellipse(self, *args, **kwargs) :
         return Ellipse2D(self, *args, **kwargs)
     
+    def arrowhead(self, *args, **kwargs) :
+        return _ArrowHead2D(self, *args, **kwargs)
+    
 
 class _Object2D :
     def __init__(self, master : Plane2D) :
@@ -110,7 +113,6 @@ class _Object2D :
     def style(self, dash : list[float|int] =None) :
         if dash != None :
             self._dash = dash.copy()
-        self._fill = fill
         
     def _drawstyle(self, file) :
         if self._dash != None :
@@ -190,10 +192,10 @@ class Polygon2D(_Object2D) :
         for edge in self.edges:
             edge.undraw()
     
-    def style(self, **kwargs) :
-        super().style(**kwargs)
+    def style(self, *args, **kwargs) :
+        super().style(*args, **kwargs)
         for edge in self.edges:
-            edge.style(**kwargs)
+            edge.style(*args, **kwargs)
             
 
 class Rectangle2D(Polygon2D) :
@@ -235,13 +237,42 @@ class _ArrowHead2D(_Object2D) :
         self.back = Point2D._compatibilitycheck(master, back)
         self.width = width
     
+    def length(self, length = None) :
+        if length :
+            self.back.position = self.end.position + length*(self.back-self.end)/np.linalg.norm(self.back-self.end)
+        return np.linalg.norm(self.back-self.end)
+    
     def _export(self, file) :
         if self._drawflag :
             temp = self.end - self.back
             file.write("{} {} moveto\n".format(self.end.position[0], self.end.position[1]))
             file.write("{} dup rotate\n".format(np.atan2(temp[1], temp[0])))
             self._drawstyle(file)
-            file.write("0 {} 2 div dup {} exch rlineto neg rlineto closepath fill\n".format(self.width, np.linalg.norm(temp)))
+            file.write("0 {} 2 div dup {} exch rlineto neg rlineto closepath fill\n neg rotate\n".format(self.width, np.linalg.norm(temp)))
+
+
+class Vector2D(_Object2D) :
+    def __init__(self, master : Plane2D, start, end) :
+        super().__init__(master)
+        self.start = Point2D._compatibilitycheck(master, start)
+        self.end = Point2D._compatibilitycheck(master, end)
+        self.line = master.line(self.start, self.end)
+        self.arrowhead = master.arrowhead(self.end, self.end.position-10.*(self.end-self.start)/np.linalg.norm(self.end-self.start), 6.)
+    
+    def draw(self) :
+        super().draw()
+        self.line.draw()
+        self.arrowhead.draw()
+    
+    def undraw(self):
+        super().undraw()
+        self.line.undraw()
+        self.arrowhead.undraw()
+    
+    def style(self, *args, **kwargs):
+        super.style(*args, **kwargs)
+        self.line.style(*args, **kwargs)
+        self.arrowhead.style(*args, **kwargs)
             
 
 class _ObjectPseudo3D :
