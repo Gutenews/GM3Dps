@@ -90,7 +90,7 @@ class Plane2D :
     def line(self, *args, **kwargs) :
         return Line2D(self, *args, **kwargs)
     
-    def polygone(self, *args, **kwargs) :
+    def polygon(self, *args, **kwargs) :
         return Polygon2D(self, *args, **kwargs)
     
     def rectangle(self, *args, **kwargs) :
@@ -110,6 +110,7 @@ class _Object2D :
     def style(self, dash : list[float|int] =None) :
         if dash != None :
             self._dash = dash.copy()
+        self._fill = fill
         
     def _drawstyle(self, file) :
         if self._dash != None :
@@ -206,7 +207,7 @@ class Rectangle2D(Polygon2D) :
         
 
 class Ellipse2D(_Object2D) :
-    def __init__(self, master, center : Point2D|np.ndarray, point0 : Point2D|np.ndarray, point1 : Point2D|np.ndarray) :
+    def __init__(self, master : Plane2D, center : Point2D|np.ndarray, point0 : Point2D|np.ndarray, point1 : Point2D|np.ndarray) :
         self.center = Point2D._compatibilitycheck(master, center)
         self.point0 = Point2D._compatibilitycheck(master, point0)
         self.point1 = Point2D._compatibilitycheck(master, point1)
@@ -226,6 +227,22 @@ class Ellipse2D(_Object2D) :
             file.write("newpath 0 0 {} 0 360 arc stroke\ngrestore\n".format(np.linalg.norm(Maxis)))
             self.master._coordinate(file)
 
+
+class _ArrowHead2D(_Object2D) :
+    def __init__(self, master : Plane2D, end : Point2D|np.ndarray, back : Point2D|np.ndarray, width : float) :
+        super().__init__(master)
+        self.end = Point2D._compatibilitycheck(master, end)
+        self.back = Point2D._compatibilitycheck(master, back)
+        self.width = width
+    
+    def _export(self, file) :
+        if self._drawflag :
+            temp = self.end - self.back
+            file.write("{} {} moveto\n".format(self.end.position[0], self.end.position[1]))
+            file.write("{} dup rotate\n".format(np.atan2(temp[1], temp[0])))
+            self._drawstyle(file)
+            file.write("0 {} 2 div dup {} exch rlineto neg rlineto closepath fill\n".format(self.width, np.linalg.norm(temp)))
+            
 
 class _ObjectPseudo3D :
     def __init__(self, master : Figure3D, origin : np.ndarray, normal : np.ndarray) :
