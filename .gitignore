@@ -1,0 +1,4 @@
+src/
+*.ps
+build/
+__pycache__/
