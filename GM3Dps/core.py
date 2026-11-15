@@ -106,9 +106,9 @@ class Figure3D :
             dest.write("300 421 translate\ngsave\n") #center the figure
             if frame : 
                 dest.write("newpath {} dup 2 div neg {} dup 2 div neg 2 index exch moveto 2 index 0 rlineto exch 0 exch pop exch rlineto neg 0 rlineto closepath stroke\n".format(self.width, self.height))
-            for label in self.labels :
+            for label in self._labels :
                 label._export(dest)
-            for child in self.children :
+            for child in self._children :
                 child._export(dest)
             dest.write("grestore\n")
             dest.write("showpage")
@@ -297,7 +297,7 @@ class Plane2D :
     
     def _export(self, file) :
         self._coordinate(file)    
-        for child in self.children :
+        for child in self._children :
             child._export(file)
         file.write("grestore\n")
 

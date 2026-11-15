@@ -26,8 +26,6 @@ extensions = [
 autosummary_generate = True
 
 # -- Autodoc configuration ---------------------------------------------------
-def auto_skip_member(app, obj_type, name, obj, skip, options) :
-    return obj_type == 'property' or None
 autodoc_typehints = 'none'
 autodoc_member_order = 'groupwise'
 
@@ -36,8 +34,6 @@ napoleon_use_rtype = False
 
 sys.path.insert(0, str(Path('..').resolve()))
 
-#def setup(app) :
-#    app.connect('autodoc-skip-member', auto_skip_member)
 
 templates_path = ['_templates']
 exclude_patterns = ['src/']

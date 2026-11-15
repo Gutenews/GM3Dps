@@ -2,4 +2,3 @@ src/
 *.ps
 build/
 __pycache__/
-_autosummary/
