@@ -3,6 +3,9 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import sys
+from pathlib import Path
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -22,13 +25,25 @@ extensions = [
 
 autosummary_generate = True
 
+# -- Autodoc configuration ---------------------------------------------------
+def auto_skip_member(app, obj_type, name, obj, skip, options) :
+    return obj_type == 'property' or None
+autodoc_typehints = 'none'
+autodoc_member_order = 'groupwise'
+
+
+napoleon_use_rtype = False
+
+sys.path.insert(0, str(Path('..').resolve()))
+
+#def setup(app) :
+#    app.connect('autodoc-skip-member', auto_skip_member)
+
 templates_path = ['_templates']
-exclude_patterns = []
-
-
+exclude_patterns = ['src/']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']

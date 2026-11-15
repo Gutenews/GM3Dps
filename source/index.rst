@@ -6,12 +6,17 @@
 3D Geometry to PS documentation
 ===============================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Welcome to the documentation of ``GM3Dps``, a python module to create Postscript figure to show 3D (or 2D) geometry.
+
+Keep in mind that this module is still in active developpement and will go under some changes with time.
+
+If you have any inquiries (in English or in French) about this module or anything do not hesitate to contact 
+me through my academic e-mail address, yannis.benchaib-langon@student.isae-supaero.fr.
 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
 
+   GM3Dps
