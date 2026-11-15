@@ -1,24 +1,29 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "GM3Dps"
 version = "0.0.1"
 description = "A package to create 3D (and 2D) Postscript figure in Python"
-readme = "README"
+readme = "README.md"
 authors  = [{name = "Yannis Benchaib--Langon", email = "yannis.benchaib-langon@student.isae-supaero.fr"}]
-license = {file = "LICENSE"}
+license-files = ["LICENSE"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = ["geometry", "postscript"]
+keywords = [
+    "geometry", 
+    "postscript"
+]
 dependencies = [
-    "numpy>=2.3.0",
-    "python_
+    "numpy>=2.4.0"
 ]
 
 [project.urls]
 Homepage = "https://github.com/Gutenews/GM3Dps"
+
+[tool.setuptools]
+packages = ["GM3Dps"]
+package-dir = {"" = "."}

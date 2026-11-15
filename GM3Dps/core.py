@@ -15,19 +15,6 @@ class GM3DpsError(ValueError) :
 class Figure3D :
     """
     Base of every figure where everything else will be drawn
-
-    Parameters
-    ----------
-    width : float
-        Screen width of the figure
-    height : float
-        Screen height of the figure
-    zvector : 3D vector, default : [0., -1., 0.]
-        Vector facing in the screen (away from the observer)
-    origin : 3D vector, default : [0., 0., 0.]
-        Point in the center of the screen
-    alpha : float
-        Rotation (in degrees) of the figure on the screen anticlockwise
     """
     def __init__(self, 
                  width : float, 
@@ -114,28 +101,25 @@ class Figure3D :
     def plane2D(self, *args, **kwargs) :
         """
         Method to create :obj:`Plane2D` with the figure as its master
-
-        à compléter
         """
         return Plane2D(self, *args, **kwargs)
             
     def label(self, *args, **kwargs) :
         """
         Method to create :obj:`Label` with the figure as its master
-
-        à completer
         """
         return Label(self, *args, **kwargs)
 
 class Label :
+    """
+    Label to have text on the figure
+    """
     def __init__(self, 
                  master : Figure3D, 
                  text : str, 
                  origin : np.ndarray, 
                  offset2D : np.ndarray = np.array([0.,0.]), **kwargs) :
         """
-        Label to have text on the figure
-
         Parameters
         ----------
         master : :obj:`Figure3D`
@@ -197,14 +181,15 @@ class Label :
             file.write("({}) show\n".format(self.text))
 
 class Plane2D :
+    """
+    2D plane on the Figure to draw 2D objects
+    """
     def __init__(self, 
                  master : Figure3D, 
                  origin : np.ndarray, 
                  normal : np.ndarray, 
                  alpha : float = 0.) :
         """
-        2D plane on the Figure to draw 2D objects
-
         Parameters
         ----------
         master : :obj:`Figure3D`
@@ -432,6 +417,9 @@ class _Object2D :
     
 
 class Point2D(_Object2D) :
+    """
+    2D point on a plane
+    """
     @staticmethod
     def _compatibilitycheck(master, pointlike) :
         if isinstance(pointlike, Point2D) :
@@ -445,8 +433,6 @@ class Point2D(_Object2D) :
     
     def __init__(self, master : Plane2D, pos : np.ndarray) :
         """
-        2D point on a plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -491,13 +477,14 @@ class Point2D(_Object2D) :
             return self.position - other
 
 class Line2D(_Object2D):
+    """
+    Line to draw on a 2D plane
+    """
     def __init__(self, 
                  master : Plane2D, 
                  origin : np.ndarray|Point2D, 
                  end : np.ndarray|Point2D) :
         """
-        Line to draw on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -589,11 +576,12 @@ class Line2D(_Object2D):
             
 
 class Polygon2D(_Object2D) :
+    """
+    Polygon on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  verteces : list[np.ndarray]|list[Point2D]) :
         """
-        Polygon on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -616,13 +604,14 @@ class Polygon2D(_Object2D) :
             
 
 class Rectangle2D(Polygon2D) :
+    """
+    Rectangle on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  point0 : np.ndarray|Point2D, 
                  point1 : np.ndarray|Point2D, 
                  point3 : np.ndarray|Point2D) :
         """
-        Rectangle on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -647,13 +636,14 @@ class Rectangle2D(Polygon2D) :
         
 
 class Ellipse2D(_Object2D) :
+    """
+    Ellipse on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  center : Point2D|np.ndarray, 
                  point0 : Point2D|np.ndarray, 
                  point1 : Point2D|np.ndarray) :
         """
-        Ellipse on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -776,12 +766,13 @@ class _ArrowHead2D(_Object2D) :
 
 
 class Vector2D(_Object2D) :
+    """
+    Vector to plot on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  start : Point2D|np.ndarray, 
                  end : Point2D|np.ndarray) :
         """
-        Vector to plot on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -806,14 +797,15 @@ class Vector2D(_Object2D) :
         self._style_children = [self.line]
     
 class Arc2D(_Object2D) :
+    """
+    Arc to show an angle on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  center : Point2D|np.ndarray, 
                  alpha0 : float, 
                  alpha1 : float, 
                  radius : float) :
         """
-        Arc to show an angle on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`
@@ -851,6 +843,9 @@ class Arc2D(_Object2D) :
                                                                     np.rad2deg(self.alpha1)))
 
 class Angle2D(_Object2D) :
+    """
+    Angle to show an angle on a 2D plane
+    """
     def __init__(self, master : Plane2D, 
                  center : Point2D|np.ndarray, 
                  alpha0 : float, 
@@ -858,8 +853,6 @@ class Angle2D(_Object2D) :
                  radius : float, 
                  anticlockwise : bool = True) :
         """
-        Angle to show an angle on a 2D plane
-
         Parameters
         ----------
         master : :obj:`Plane2D`

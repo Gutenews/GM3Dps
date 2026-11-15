@@ -2,3 +2,5 @@ tests/
 *.ps
 build/
 __pycache__/
+*.egg-info/
+dist/
