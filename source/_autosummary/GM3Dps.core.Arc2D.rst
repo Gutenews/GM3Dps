@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Arc2D
+GM3Dps.core.Arc2D
 =================
 
 .. currentmodule:: GM3Dps.core

@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Plane2D
+GM3Dps.core.Plane2D
 ===================
 
 .. currentmodule:: GM3Dps.core

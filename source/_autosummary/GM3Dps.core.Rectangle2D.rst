@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Rectangle2D
+GM3Dps.core.Rectangle2D
 =======================
 
 .. currentmodule:: GM3Dps.core

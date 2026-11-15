@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Label
+GM3Dps.core.Label
 =================
 
 .. currentmodule:: GM3Dps.core

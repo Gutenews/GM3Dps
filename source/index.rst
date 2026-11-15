@@ -19,4 +19,4 @@ me through my academic e-mail address, yannis.benchaib-langon@student.isae-supae
    :template: custom-module-template.rst
    :recursive:
 
-   GM3Dps
+   GM3Dps.core

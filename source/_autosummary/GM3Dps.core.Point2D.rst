@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Point2D
+GM3Dps.core.Point2D
 ===================
 
 .. currentmodule:: GM3Dps.core

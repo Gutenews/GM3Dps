@@ -1,4 +1,4 @@
-GM3Dps.core
+﻿GM3Dps.core
 ===========
 
 .. automodule:: GM3Dps.core

@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Line2D
+GM3Dps.core.Line2D
 ==================
 
 .. currentmodule:: GM3Dps.core

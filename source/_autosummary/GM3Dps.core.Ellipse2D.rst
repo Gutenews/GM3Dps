@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Ellipse2D
+GM3Dps.core.Ellipse2D
 =====================
 
 .. currentmodule:: GM3Dps.core

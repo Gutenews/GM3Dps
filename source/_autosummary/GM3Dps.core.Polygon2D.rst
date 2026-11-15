@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Polygon2D
+GM3Dps.core.Polygon2D
 =====================
 
 .. currentmodule:: GM3Dps.core

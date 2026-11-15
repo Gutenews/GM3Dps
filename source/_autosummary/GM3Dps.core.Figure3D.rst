@@ -1,4 +1,4 @@
-﻿GM3Dps.core.Figure3D
+GM3Dps.core.Figure3D
 ====================
 
 .. currentmodule:: GM3Dps.core
