@@ -1,4 +1,4 @@
-src/
+tests/
 *.ps
 build/
 __pycache__/

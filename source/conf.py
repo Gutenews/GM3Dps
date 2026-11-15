@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path('..').resolve()))
 
 
 templates_path = ['_templates']
-exclude_patterns = ['src/']
+exclude_patterns = ['tests/', 'out/']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

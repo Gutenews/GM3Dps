@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Oct 10 10:33:47 2026
-
-@author: yannis
+Core part of ``GM3Dps``
 """
 
 from __future__ import annotations
